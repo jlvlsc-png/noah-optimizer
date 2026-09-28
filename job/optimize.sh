@@ -48,9 +48,11 @@ import sys
 from pmtiles.reader import Reader, MemorySource
 r = Reader(MemorySource(open(sys.argv[1], "rb").read()))
 h = r.header()
-print(h.max_zoom)
-print("min_zoom=%d max_zoom=%d addressed=%d compression=%s" % (
-    h.min_zoom, h.max_zoom, h.num_addressed_tiles, h.tile_compression), file=sys.stderr)
+# header() returns a dict in the python pmtiles lib
+print(h["max_zoom"])
+print("min_zoom=%s max_zoom=%s addressed=%s compression=%s" % (
+    h.get("min_zoom"), h.get("max_zoom"),
+    h.get("num_addressed_tiles"), h.get("tile_compression")), file=sys.stderr)
 EOF
 )
 echo "source maxzoom=$SRC_ZMAX cap=$MAXZOOM_CAP"
@@ -76,10 +78,14 @@ ha, hb = ra.header(), rb.header()
 print("src bytes:", os.path.getsize(a))
 print("opt bytes:", os.path.getsize(b))
 for tag, h in (("src", ha), ("opt", hb)):
-    print("%s zoom: %d-%d addressed=%s compression=%s" % (
-        tag, h.min_zoom, h.max_zoom,
-        getattr(h, "num_addressed_tiles", "?"),
-        getattr(h, "tile_compression", "?")))
+    if isinstance(h, dict):
+        print("%s zoom: %s-%s addressed=%s compression=%s" % (
+            tag, h.get("min_zoom"), h.get("max_zoom"),
+            h.get("num_addressed_tiles", "?"), h.get("tile_compression", "?")))
+    else:
+        print("%s zoom: %s-%s addressed=%s compression=%s" % (
+            tag, getattr(h, "min_zoom", "?"), getattr(h, "max_zoom", "?"),
+            getattr(h, "num_addressed_tiles", "?"), getattr(h, "tile_compression", "?")))
 EOF
 cat qa-report.txt
 

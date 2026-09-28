@@ -23,15 +23,20 @@ def main(src_path, opt_path):
         opt = Reader(MemorySource(f.read()))
 
     hs, ho = src.header(), opt.header()
-    print("QA src zoom %d-%d addressed=%d" % (hs.min_zoom, hs.max_zoom, hs.num_addressed_tiles))
-    print("QA opt zoom %d-%d addressed=%d" % (ho.min_zoom, ho.max_zoom, ho.num_addressed_tiles))
+    # python pmtiles lib returns header as dict
+    if not isinstance(hs, dict):
+        hs = hs.__dict__
+    if not isinstance(ho, dict):
+        ho = ho.__dict__
+    print("QA src zoom %s-%s addressed=%s" % (hs.get("min_zoom"), hs.get("max_zoom"), hs.get("num_addressed_tiles")))
+    print("QA opt zoom %s-%s addressed=%s" % (ho.get("min_zoom"), ho.get("max_zoom"), ho.get("num_addressed_tiles")))
 
-    assert ho.min_zoom == hs.min_zoom, "min_zoom changed %s -> %s" % (hs.min_zoom, ho.min_zoom)
-    assert ho.max_zoom <= hs.max_zoom, "max_zoom grew"
+    assert ho.get("min_zoom") == hs.get("min_zoom"), "min_zoom changed"
+    assert ho.get("max_zoom") <= hs.get("max_zoom"), "max_zoom grew"
     assert os.path.getsize(opt_path) < os.path.getsize(src_path), "not smaller — not shipping"
 
     checked = 0
-    for z in range(hs.min_zoom, min(hs.max_zoom, APP_ZOOM_CAP) + 1):
+    for z in range(hs.get("min_zoom"), min(hs.get("max_zoom"), APP_ZOOM_CAP) + 1):
         # Deterministic spread of candidate tiles; keep ones that exist.
         n = 2 ** z
         idxs = sorted(set(
