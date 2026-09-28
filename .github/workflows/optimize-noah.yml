@@ -44,10 +44,11 @@ jobs:
       - name: Build go-pmtiles binary
         if: steps.pmtiles-cache.outputs.cache-hit != 'true'
         run: |
-          go install github.com/protomaps/go-pmtiles/pmtiles@latest
-          ~/go/bin/pmtiles --help | head -5
+          go install github.com/protomaps/go-pmtiles@latest
+          ls ~/go/bin/
           mkdir -p ~/pmtiles-bin
-          cp ~/go/bin/pmtiles ~/pmtiles-bin/
+          cp ~/go/bin/go-pmtiles ~/pmtiles-bin/pmtiles
+          ~/pmtiles-bin/pmtiles --help | head -5
 
       - name: Add pmtiles to PATH
         run: echo "$HOME/pmtiles-bin" >> "$GITHUB_PATH"
