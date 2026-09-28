@@ -42,12 +42,12 @@ Rollback = revert that line to the bettergovph URL. Done layers so far
 
 | layer | src size | opt size | src maxzoom | opt maxzoom | result |
 |---|---|---|---|---|---|
-| flood_100yr | 969MB | | | | |
-| landslide | 2.7GB | | | | |
-| ssa1 | | | | | |
-| ssa2 | | | | | |
-| ssa3 | | | | | |
-| ssa4 | | | | | |
+| flood_100yr | 1016MB | 558MB (−45%) | 14 | 12 | PASS, wired |
+| landslide | 2844MB | 1398MB (−51%) | 14 | 12 | PASS, wired |
+| ssa1 | 62MB | 30MB (−51%) | 14 | 12 | PASS, wired |
+| ssa2 | 68MB | 34MB (−50%) | 14 | 12 | PASS, wired |
+| ssa3 | 69MB | 34MB (−50%) | 14 | 12 | PASS, wired |
+| ssa4 | 67MB | 33MB (−50%) | 14 | 12 | PASS, wired |
 
 ## Recipe (job/optimize.sh + job/qa.py)
 
