@@ -1,0 +1,70 @@
+name: Optimize NOAH PMTiles
+
+on:
+  workflow_dispatch:
+    inputs:
+      layer:
+        description: 'Layer to optimize'
+        required: true
+        type: choice
+        options:
+          - flood_100yr
+          - landslide
+          - ssa1
+          - ssa2
+          - ssa3
+          - ssa4
+      maxzoom_cap:
+        description: 'Drop zooms above this (app never requests >12)'
+        required: false
+        default: '12'
+
+jobs:
+  optimize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: 'stable'
+
+      - name: Install PMTiles tools (cached)
+        uses: actions/cache@v4
+        id: pmtiles-cache
+        with:
+          path: ~/go/bin/pmtiles
+          key: pmtiles-go-${{ runner.os }}-v1
+
+      - name: Build go-pmtiles binary
+        if: steps.pmtiles-cache.outputs.cache-hit != 'true'
+        run: |
+          go install github.com/protomaps/go-pmtiles/pmtiles@latest
+          ~/go/bin/pmtiles --help | head -5
+          mkdir -p ~/pmtiles-bin
+          cp ~/go/bin/pmtiles ~/pmtiles-bin/
+
+      - name: Add pmtiles to PATH
+        run: echo "$HOME/pmtiles-bin" >> "$GITHUB_PATH"
+
+      - name: Install python deps
+        run: pip install huggingface_hub pmtiles
+
+      - name: Optimize layer
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          LAYER: ${{ inputs.layer }}
+          MAXZOOM_CAP: ${{ inputs.maxzoom_cap }}
+        run: bash job/optimize.sh
+
+      - name: Upload QA report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: qa-${{ inputs.layer }}
+          path: qa-report.txt
