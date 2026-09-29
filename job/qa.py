@@ -10,7 +10,7 @@ Checks (all must pass):
 import sys
 
 APP_ZOOM_CAP = 12
-SAMPLE_TILES_PER_ZOOM = 8
+SAMPLE_TILES_PER_ZOOM = 24
 
 
 def main(src_path, opt_path):
